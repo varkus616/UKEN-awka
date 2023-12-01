@@ -1,6 +1,25 @@
 <?php
+
+
+  /*class User
+  {
+      #public $id;
+      public $first_name;
+      public $last_name;
+      public $email;
+      public $date_of_birth;
+
+      public function __construct($first_name, $last_name, $email, $date_of_birth)
+      {
+          #$this->id = $id;
+          $this->first_name = $first_name;
+          $this->email = $email;
+          $this->last_name = $last_name;
+          $this->date_of_birth = $date_of_birth;
+      }
+  }*/
     require "connect_to_db.php";
-    #$registration_complete = false;
+
     $user_is_already_registered = false;
     $registration_msg = "Rejestracja ukończona !";
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -11,7 +30,7 @@
         $password = $_POST["password"];
 
 
-        if (strlen($password) < 9){
+        if (strlen($password) < 3){
             echo '<script>alert("Hasło zbyt krótkie!");</script>';
         }else {
 
@@ -26,8 +45,6 @@
               $search_stmt->bindParam(':email',
                                       $email);
               
-              #$search_stmt->bindPAram(':hashed_password',
-              #                        $hashed_password);
               
               $res = $search_stmt->execute();
               $fetch_res = $search_stmt->fetch(PDO::FETCH_ASSOC);
@@ -45,12 +62,6 @@
                                         $last_name);
                 $insert_stmt->bindParam(':email', $email);
 
-                /*$salt = random_bytes(16);
-                $iterations = 777777;
-
-                $hashed_password = hash_pbkdf2("sha256", 
-                $password, $salt, $iterations, 20);
-                */
                 $hashed_password = password_hash($password,
               PASSWORD_DEFAULT);
 
@@ -63,15 +74,12 @@
                 
                 $insert_stmt->execute();
                 
-                //echo "Rejestracja udana!";
-                #$registration_complete = true;
-                #$registration_msg = "Rejestracaj udana! Można się teraz zalogować."
+               
 
                 session_start();
-                $_SESSION['first_name'] = $first_name;
+                #$_SESSION['user_session'] = new User($first_name, $last_name, $email, $date_of_birth)
                 $_SESSION['email'] = $email;
-                $_SESSION['last_name'] = $last_name;
-                $_SESSION['date_of_birth'] = $date_of_birth;
+                require "start_session.php";
                 header("Location: my_account.php");
                 exit();
 
@@ -85,14 +93,6 @@
         }
     }
 
-    /*$sql = "INSERT INTO users 
-        (first_name, last_name, email, password, date_of_birth) 
-        VALUES ('$first_name', '$last_name', '$email', '$password', '$date_of_birth')";
-        if ($conn->query($sql)){
-            echo "<h1>Rejestracja udana !</h1>";
-        }else {
-            echo "Error".$sql."<br>".$conn->error;
-        }*/
 ?>
 
 <html lang="en">

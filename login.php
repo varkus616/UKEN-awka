@@ -12,26 +12,17 @@
           "SELECT * FROM users WHERE users.email=:email"
         );
 
-        #$hashed_password = password_hash($password,
-        #                   PASSWORD_DEFAULT);
         
         $search_stmt->bindParam(':email',
                                 $email);
         
-        #$search_stmt->bindPAram(':password',
-        #                        $hashed_password);
-        
         $res = $search_stmt->execute();
         $fetch_res = $search_stmt->fetch(PDO::FETCH_ASSOC);
         
-        #foreach($fetch_res as $row)
-        #  foreach($row as $key => $value)
-        #    echo $key." ";
 
         if ($fetch_res){
           $hashed_password = $fetch_res['password'];
-          #echo $hashed_password;
-          #echo $password;
+          
           echo  password_verify($password, $hashed_password);
           if (password_verify($password, $hashed_password)){
               $error_msg = "Logowanie niepoprawne. Proszę znowu spróbować.";
@@ -39,15 +30,23 @@
           }else {
           
             session_start();
-            $_SESSION['first_name'] = $fetch_res['first_name'];
+            #$_SESSION['first_name'] = $fetch_res['first_name'];
             $_SESSION['email'] = $fetch_res['email'];
-            $_SESSION['last_name'] = $fetch_res['last_name'];
-            $_SESSION['date_of_birth'] = $fetch_res['date_of_birth'];
+            #$_SESSION['last_name'] = $fetch_res['last_name'];
+            #$_SESSION['date_of_birth'] = $fetch_res['date_of_birth'];
+            if (
+              ($email === 'wiktor.sioła@student.up.kraków.pl' && password_verify($password, $fetch_res['password'])) ||
+              ($email === 'viktor.siropol@student.up.kraków.pl' && password_verify($password, $fetch_res['password']))
+          ){
+            $_SESSION['role'] == 'admin';
+          }
+
+            require "start_session.php";
             header("Location: my_account.php");
             exit();
           }
         }
-      }catch(PDOException $e) {
+      }catch(PDOException $e){
         echo "Błąd: " . $e->getMessage();
       }
     }
