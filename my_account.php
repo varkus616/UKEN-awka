@@ -1,13 +1,18 @@
 <?php require "connect_to_db.php"; require "start_session.php";?>
+<script>
 
+if ( window.history.replaceState ) {
+  window.history.replaceState( null, null, window.location.href );
+}
 
+</script>
 <?php 
     if ($_SERVER["REQUEST_METHOD"] == "POST" && 
         isset($_POST["new_post_title"]) && 
         isset($_POST["new_post"])) {
 
       $title = $_POST["new_post_title"];
-      $user_id = $_SESSION['user_id'];
+      $user_id = getSessionVariable('user_id');
       $content = $_POST["new_post"];
       $created_at = date('Y-m-d H:i:s'); 
   
@@ -48,10 +53,12 @@
     <title>UKEN-awka</title>
   </head>
   <body>
-    <div id="base_container">
+    <div id="base_container" >
       <div id="content">
-        <header>
+        <header id="account_header">
             <h1>Mój profil</h1>
+            <h2><a href="my_friends.php">Znajomi</a></h2>
+            <h2><a href="add_friend.php">Dodaj znajomego</a></h2>
             <a href="logout.php">Wyloguj</a>
         </header>
         
@@ -66,7 +73,7 @@
           <label for="new_post_title">Tytuł</label>
 
           <br>
-          <input type="text" value="Tytul" name="new_post_title" require>
+          <input type="text"  name="new_post_title" require>
           <br>
 
           <label for="new_post">Dodaj nowego posta</label>
@@ -75,7 +82,7 @@
           <textarea id="new_post" name="new_post" rows="1" cols="1" require></textarea>
           <br>
 
-          <input type="submit" value="Dodaj" />
+          <input type="submit" value="Dodaj" name="submitbtn"/>
 
         </form>
         <?php
@@ -94,23 +101,19 @@
               $search_stmt->bindParam(":user_id", $fetch_res['id']);
               $res = $search_stmt->execute();
               $posts = $search_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+              
               if ($res && $posts) {
-                  echo "<table border='1'>";
-                  echo "<tr>";
-                  echo "<th>Post ID</th>";
-                  echo "<th>Tytuł</th>";
-                  echo "<th>Treść</th>";
-                  echo "<th>Czas utworzenia</th>";
-                  echo "</tr>";
+                  echo "<div class='posts'>";
                   foreach ($posts as $post) {
-                      echo "<tr>";
-                      echo "<td>" . $post['id'] . "</td>";
-                      echo "<td>" . $post['title'] . "</td>";
-                      echo "<td>" . $post['content'] . "</td>";
-                      echo "<td>" . $post['created_at'] . "</td>";
-                      echo "</tr>";
+                      echo "<div class='post'>";
+                      echo "<div><strong>Post ID:</strong> " . $post['id'] . "</div>";
+                      echo "<div><strong>Tytuł:</strong> " . $post['title'] . "</div>";
+                      echo "<div><strong>Treść:</strong> " . $post['content'] . "</div>";
+                      echo "<div><strong>Czas utworzenia:</strong> " . $post['created_at'] . "</div>";
+                      echo "</div>";
                   }
-                  echo "</table>";
+                  echo "</div>";
               }
           }else {
             echo "<h3>Brak postów</h3>";

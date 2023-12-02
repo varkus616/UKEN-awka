@@ -3,11 +3,16 @@ body {
 }
 
 #base_container {
-  display: flex;
+  /*display: flex;*/
   align-items: center;
   justify-content: center;
   height: 100vh;
   margin: 0;
+}
+
+#account_header {
+  display: block;
+  float: right;
 }
 
 #content {
@@ -61,4 +66,18 @@ form input {
 }
 form a {
   color: #fff;
+}
+
+.posts {
+  margin: 20px 0;
+}
+
+.post {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.post div {
+  margin-bottom: 5px;
 }

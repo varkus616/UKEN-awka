@@ -1,8 +1,17 @@
+<script>
+
+if ( window.history.replaceState ) {
+  window.history.replaceState( null, null, window.location.href );
+}
+
+</script>
 <?php
     require "connect_to_db.php";
     $error_msg = "";
     $error = false;
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if ($_SERVER["REQUEST_METHOD"] == "POST" &&
+        isset($_POST['e-mail']) &&
+        isset($_POST['password'])) {
 
         $email = $_POST["e-mail"];
         $password = $_POST["password"];
@@ -21,37 +30,36 @@
         
 
         if ($res && $fetch_res){
-          $hashed_password = $fetch_res['password'];
-          
-          echo  password_verify($password, $hashed_password);
-          if (password_verify($password, $hashed_password)){
+            $hashed_password = $fetch_res['password'];
+            if (password_verify($password, $hashed_password)){
+
+              $role = 'user';
+
+              if (
+                  ($email === 'wiktor.sioła@student.up.kraków.pl' 
+                  && password_verify($password, $fetch_res['password'])) 
+                  ||
+                  ($email === 'viktor.siropol@student.up.kraków.pl' 
+                  && password_verify($password, $fetch_res['password']))
+                )
+                $role == 'admin';
+            
+
+              require "start_session.php";
+
+              setSessionVariable('user_id', $fetch_res['id']);
+              setSessionVariable('email',$email);
+              setSessionVariable('first_name',$fetch_res['first_name']);
+              setSessionVariable('last_name',$fetch_res['last_name']);
+              setSessionVariable('date_of_birth',$fetch_res['date_of_birth']);
+              setSessionVariable('role',$role);
+
+              header("Location: my_account.php");
+              exit();
+              
+          }else {
               $error_msg = "Logowanie niepoprawne. Proszę znowu spróbować.";
               $error = true;
-          }else {
-          
-            $role = 'user';
-
-            if (
-              ($email === 'wiktor.sioła@student.up.kraków.pl' 
-              && password_verify($password, $fetch_res['password'])) 
-              ||
-              ($email === 'viktor.siropol@student.up.kraków.pl' 
-              && password_verify($password, $fetch_res['password']))
-          ){
-            $role == 'admin';
-          }
-
-            require "start_session.php";
-            
-            setSessionVariable('user_id', $fetch_res['id']);
-            setSessionVariable('email',$email);
-            setSessionVariable('first_name',$fetch_res['first_name']);
-            setSessionVariable('last_name',$fetch_res['last_name']);
-            setSessionVariable('date_of_birth',$fetch_res['date_of_birth']);
-            setSessionVariable('role',$role);
-            
-            header("Location: my_account.php");
-            exit();
           }
         }
       }catch(PDOException $e){
