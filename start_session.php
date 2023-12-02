@@ -1,27 +1,32 @@
 <?php
 session_start();
+#if (session_status() == PHP_SESSION_NONE){
+#    session_start();
+#}
 
-if (isset($_SESSION['user_id'])) {
 
-
-} else {
-    
-    $email = isset($_SESSION['email']) ? $_SESSION['email'] : null;
-
-    if ($email) {
-        // Zapytanie SQL do pobrania danych użytkownika
-        $user_query = $conn->prepare("SELECT * FROM users WHERE email = :email");
-        $user_query->bindParam(":email", $email);
-        $user_query->execute();
-        $user_data = $user_query->fetch(PDO::FETCH_ASSOC);
-
-        if ($user_data) {
-            $_SESSION['user_id'] = $user_data['id'];
-            $_SESSION['first_name'] = $user_data['first_name'];
-            $_SESSION['email'] = $user_data['email'];
-            $_SESSION['last_name'] = $user_data['last_name'];
-            $_SESSION['date_of_birth'] = $user_data['date_of_birth'];
-        }
-    }
+function setSessionVariable($key, $value) {
+    $_SESSION[$key] = $value;
 }
+
+function getSessionVariable($key) {
+    return isset($_SESSION[$key]) ? $_SESSION[$key] : null;
+}
+
+#$userData = null;
+#function startSession($userData) {
+
+    /*$_SESSION['email'] = $userData['email'];
+    $_SESSION['user_id'] = $userData['user_id'];
+    $_SESSION['first_name'] = $userData['first_name'];
+    $_SESSION['last_name'] = $userData['last_name'];
+    $_SESSION['date_of_birth'] = $userData['date_of_birth'];
+
+    if ($userData['role'] === 'admin') {
+        $_SESSION['role'] = 'admin';
+    }
+    */
+
+#}
+
 ?>

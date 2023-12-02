@@ -1,23 +1,4 @@
 <?php
-
-
-  /*class User
-  {
-      #public $id;
-      public $first_name;
-      public $last_name;
-      public $email;
-      public $date_of_birth;
-
-      public function __construct($first_name, $last_name, $email, $date_of_birth)
-      {
-          #$this->id = $id;
-          $this->first_name = $first_name;
-          $this->email = $email;
-          $this->last_name = $last_name;
-          $this->date_of_birth = $date_of_birth;
-      }
-  }*/
     require "connect_to_db.php";
 
     $user_is_already_registered = false;
@@ -35,9 +16,6 @@
         }else {
 
           try { 
-
-              
-
               $search_stmt = $conn->prepare(
                 "SELECT email FROM users WHERE users.email=:email"
               );
@@ -63,7 +41,7 @@
                 $insert_stmt->bindParam(':email', $email);
 
                 $hashed_password = password_hash($password,
-              PASSWORD_DEFAULT);
+                PASSWORD_DEFAULT);
 
                 $insert_stmt->bindParam(':password', 
                 $hashed_password);
@@ -74,12 +52,17 @@
                 
                 $insert_stmt->execute();
                 
-               
+                $role = 'user';
 
-                session_start();
-                #$_SESSION['user_session'] = new User($first_name, $last_name, $email, $date_of_birth)
-                $_SESSION['email'] = $email;
                 require "start_session.php";
+                
+                setSessionVariable('user_id',$conn->lastInsertId());
+                setSessionVariable('email',$email);
+                setSessionVariable('first_name',$first_name);
+                setSessionVariable('last_name',$last_name);
+                setSessionVariable('date_of_birth',$date_of_birth);
+                setSessionVariable('role',$role);
+
                 header("Location: my_account.php");
                 exit();
 

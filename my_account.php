@@ -2,7 +2,10 @@
 
 
 <?php 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && 
+        isset($_POST["new_post_title"]) && 
+        isset($_POST["new_post"])) {
+
       $title = $_POST["new_post_title"];
       $user_id = $_SESSION['user_id'];
       $content = $_POST["new_post"];
@@ -91,7 +94,6 @@
               $search_stmt->bindParam(":user_id", $fetch_res['id']);
               $res = $search_stmt->execute();
               $posts = $search_stmt->fetchAll(PDO::FETCH_ASSOC);
-              echo "tu";
               if ($res && $posts) {
                   echo "<table border='1'>";
                   echo "<tr>";

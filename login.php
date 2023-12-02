@@ -20,7 +20,7 @@
         $fetch_res = $search_stmt->fetch(PDO::FETCH_ASSOC);
         
 
-        if ($fetch_res){
+        if ($res && $fetch_res){
           $hashed_password = $fetch_res['password'];
           
           echo  password_verify($password, $hashed_password);
@@ -29,19 +29,27 @@
               $error = true;
           }else {
           
-            session_start();
-            #$_SESSION['first_name'] = $fetch_res['first_name'];
-            $_SESSION['email'] = $fetch_res['email'];
-            #$_SESSION['last_name'] = $fetch_res['last_name'];
-            #$_SESSION['date_of_birth'] = $fetch_res['date_of_birth'];
+            $role = 'user';
+
             if (
-              ($email === 'wiktor.sioła@student.up.kraków.pl' && password_verify($password, $fetch_res['password'])) ||
-              ($email === 'viktor.siropol@student.up.kraków.pl' && password_verify($password, $fetch_res['password']))
+              ($email === 'wiktor.sioła@student.up.kraków.pl' 
+              && password_verify($password, $fetch_res['password'])) 
+              ||
+              ($email === 'viktor.siropol@student.up.kraków.pl' 
+              && password_verify($password, $fetch_res['password']))
           ){
-            $_SESSION['role'] == 'admin';
+            $role == 'admin';
           }
 
             require "start_session.php";
+            
+            setSessionVariable('user_id', $fetch_res['id']);
+            setSessionVariable('email',$email);
+            setSessionVariable('first_name',$fetch_res['first_name']);
+            setSessionVariable('last_name',$fetch_res['last_name']);
+            setSessionVariable('date_of_birth',$fetch_res['date_of_birth']);
+            setSessionVariable('role',$role);
+            
             header("Location: my_account.php");
             exit();
           }
