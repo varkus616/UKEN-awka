@@ -1,83 +1,173 @@
 body {
-  background-color: #36486b;
+  background-size: cover;
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+  font-weight: bold; /* Zwiększenie grubości tekstu */
+  color: #2ecc71; /* Zielony, bardziej nasycony kolor tekstu */
+  background: url("background_logined.jpg") center center fixed;
+  background-size: cover;
+  color: #09e122; /* Kolor tekstu dla formularza logowania */
+}
+
+.login-page,
+.registration-page,
+.loggedin-page {
+  position: relative;
+}
+
+.login-page::before,
+.registration-page::before,
+.loggedin-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Przeźroczyste, ciemne tło */
+  z-index: -1;
+}
+
+.login-page {
+  background: url("background_log.jpg") center center fixed;
+  background-size: cover;
+  color: #09e122; /* Kolor tekstu dla formularza logowania */
+}
+
+.registration-page {
+  background: url("background.jpg") center center fixed;
+  background-size: cover;
+  color: #e00cd2; /* Kolor tekstu dla formularza rejestracji */
+}
+
+.loggedin-page {
+  background: url("background_logined.jpg") center center fixed;
+  background-size: cover;
+  color: #2ecc71; /* Kolor tekstu dla zalogowanego stanu */
+}
+
+#account_info {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: #ffffff; /* Biały kolor tekstu dla informacji o koncie */
+}
+
+#new_post {
+  height: 50px;
+  font-size: 16px;
+  padding: 5px;
+  border-radius: 15px;
+}
+
+#base_container a {
+  text-decoration: none;
+  color: #ffffff;
 }
 
 #base_container {
-  /*display: flex;*/
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  margin: 0;
-}
-
-#account_header {
-  display: block;
-  float: right;
+  min-height: 100vh;
 }
 
 #content {
-  color: black;
-  text-align: center;
+  padding: 30px;
+  border-radius: 20px; /* Zwiększenie zaokrąglenia formularza */
+  max-width: 400px; /* Zwiększenie maksymalnej szerokości formularza */
+  width: 100%;
 }
 
-#content a {
-  color: #fff;
-  text-decoration: none;
+form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
 }
 
-#content a:hover {
-  text-decoration: underline;
+form label {
+  margin-bottom: 10px;
 }
 
-#error_msg {
-  color: red;
-  text-wrap: true;
+form input {
+  margin-bottom: 15px;
+  padding: 12px;
+  border: 2px solid #ced4da; /* Zwiększenie grubości obramowania */
+  border-radius: 10px; /* Zwiększenie zaokrąglenia pól tekstowych */
+  font-size: 16px;
+  transition: border-color 0.3s ease; /* Efekt przejścia dla koloru obramowania */
+}
+
+form input[type="submit"] {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  z-index: 1; /* Zwiększenie z-index dla przycisku zaloguj */
+}
+
+form input[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+form input:focus {
+  border-color: #2ecc71; /* Zmiana koloru obramowania przy aktywnym polu */
+}
+
+.post-form input {
+  width: 100%; /* Ustawienie szerokości pola input na 100% */
+}
+
+p {
+  margin-top: 15px;
+}
+
+.posts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.post {
+  flex: 0 1 calc(33.33% - 20px);
+  border: 2px solid #ddd; /* Zwiększenie grubości obramowania posta */
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 15px; /* Zwiększenie zaokrąglenia posta */
+  transition: transform 0.3s ease;
+}
+
+.post:hover {
+  transform: scale(1.05);
+}
+
+.post div {
+  margin-bottom: 10px;
+  color: #0ecbb8;
+}
+
+.post div strong {
+  color: #2ecc71;
 }
 
 footer {
-  background-color: #4040a1;
-  color: #fff;
   padding: 20px;
   text-align: center;
-  position: fixed;
-  bottom: 0;
   width: 100%;
   max-height: 100px;
+  margin-top: auto;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 10px; /* Zwiększenie zaokrąglenia stopki */
+  color: #ffffff; /* Biały kolor tekstu w stopce */
 }
 
 footer a {
-  color: #fff;
+  color: #ffffff; /* Biały kolor linków w stopce */
   text-decoration: none;
   margin: 0 10px;
 }
 
 footer a:hover {
   text-decoration: underline;
-}
-
-form {
-  /*display: inline-block;*/
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-form input {
-  margin: 5px;
-}
-form a {
-  color: #fff;
-}
-
-.posts {
-  margin: 20px 0;
-}
-
-.post {
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin-bottom: 15px;
-}
-
-.post div {
-  margin-bottom: 5px;
 }

@@ -19,14 +19,23 @@
     <link rel="stylesheet" href="styles/main.css" />
     <title>UKEN-awka</title>
   </head>
-  <body>
+  <body class="registration-page">
     <div id="base_container">
       <div id="content">
         <header>
           <h1>Twoi przyjaciele</h1>
           <a href="my_friends.php">Przyjaciele</a>
+          <a href="add_friend.php">Dodaj znajomego</a>
           <a href="my_account.php">Moje konto</a>
           <a href="logout.php">Wyloguj</a>
+          <div id="account_info">
+            <?php
+            // Sprawdzenie, czy użytkownik jest zalogowany
+            if (isset($_SESSION['email'])) {
+                echo '<p>Zalogowano jako: ' . $_SESSION['email'] . '</p>';
+            }
+            ?>
+          </div>
         </header>
 
             <?php

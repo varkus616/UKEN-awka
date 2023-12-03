@@ -6,7 +6,30 @@ if ( window.history.replaceState ) {
 }
 
 </script>
-<?php 
+
+<?php
+    function getCommentsForPost($postId,$conn) {
+      $commentsQuery = "SELECT c.*
+      FROM comments c
+      JOIN post_comments pc ON c.id = pc.comment_id
+      WHERE pc.post_id = :post_id";
+      $stmt = $conn->prepare($commentsQuery);
+      $stmt->bindParam('post_id', $postId, PDO::PARAM_INT);
+      $stmt->execute();
+
+      
+      $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      return $res;
+    }
+
+    if (isset($_POST["new_comment"]) &&
+        isset($_POST["dodaj_komentarz"]))
+        {
+          $comment = $_POST["new_comment"];
+
+        }
+
+    $isAdmin = isset($_SESSION['role']) && getSessionVariable('role') === 'admin';
     if ($_SERVER["REQUEST_METHOD"] == "POST" && 
         isset($_POST["new_post_title"]) && 
         isset($_POST["new_post"])) {
@@ -15,7 +38,8 @@ if ( window.history.replaceState ) {
       $user_id = getSessionVariable('user_id');
       $content = $_POST["new_post"];
       $created_at = date('Y-m-d H:i:s'); 
-  
+          
+
       try {
           $insert_post_query = $conn->prepare("INSERT INTO posts (title, content, user_id, created_at) 
                                                VALUES (:title, :content, :user_id, :created_at)");
@@ -39,6 +63,58 @@ if ( window.history.replaceState ) {
       }
   }
 
+  
+      // Usuwanie użytkownika
+      if ($isAdmin && isset($_POST['delete_user'])) {
+        $userToDelete = $_POST['delete_user'];
+      
+        try {
+            $deleteUserQuery = $conn->prepare("DELETE FROM users WHERE id = :user_id");
+            $deleteUserQuery->bindParam(":user_id", $userToDelete);
+            $deleteUserQuery->execute();
+      
+            echo "Użytkownik został pomyślnie usunięty.";
+        } catch (PDOException $e) {
+            echo "Wystąpił problem podczas usuwania użytkownika: " . $e->getMessage();
+        }
+      }
+  
+      // Usuwanie posta
+      if ($isAdmin && isset($_POST['delete_post'])) {
+        $postToDelete = $_POST['delete_post'];
+  
+        try {
+            $deletePostQuery = $conn->prepare("DELETE FROM posts WHERE id = :post_id");
+            $deletePostQuery->bindParam(":post_id", $postToDelete);
+            $deletePostQuery->execute();
+
+  
+            echo "Post został pomyślnie usunięty.";
+        } catch (PDOException $e) {
+            echo "Wystąpił problem podczas usuwania posta: " . $e->getMessage();
+        }
+      }
+      if (isset($_POST["new_comment"]) &&
+        isset($_POST["dodaj_komentarz"]))
+      {
+          $comment = $_POST["new_comment"];
+          $comment_postID = $_POST["post_id"];
+          $stmt = $conn->prepare("INSERT INTO comments (content, user_id, post_id, comment_date) VALUES (:content, :author, :post_id,NOW())");
+
+          $stmt->bindParam(':content', $comment);
+          $stmt->bindParam(':author',  $_SESSION['user_id']);
+          $stmt->bindParam(':post_id', $comment_postID);
+
+          $stmt->execute();
+          $commentID = $conn->lastInsertId();
+
+          $stmt = $conn->prepare("INSERT INTO post_comments (post_id, comment_id) VALUES (:post_id, :comment_id)");
+          $stmt->bindParam(':post_id', $comment_postID);
+          $stmt->bindParam(':comment_id', $commentID);
+          $stmt->execute();
+
+      }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -52,14 +128,23 @@ if ( window.history.replaceState ) {
     <link rel="stylesheet" href="styles/main.css" />
     <title>UKEN-awka</title>
   </head>
-  <body>
+  <body class="loggedin-page">
     <div id="base_container" >
       <div id="content">
-        <header id="account_header">
-            <h1>Mój profil</h1>
-            <h2><a href="my_friends.php">Znajomi</a></h2>
-            <h2><a href="add_friend.php">Dodaj znajomego</a></h2>
-            <a href="logout.php">Wyloguj</a>
+      <header id="account_header">
+          <h1>Mój profil</h1>
+          <h2><a href="my_friends.php">Znajomi</a></h2>
+          <h2><a href="add_friend.php">Dodaj znajomego</a></h2>
+          <a href="logout.php">Wyloguj</a>
+          
+          <div id="account_info">
+            <?php
+            // Sprawdzenie, czy użytkownik jest zalogowany
+            if (isset($_SESSION['email'])) {
+                echo '<p>Zalogowano jako: ' . $_SESSION['email'] . '</p>';
+            }
+            ?>
+          </div>
         </header>
         
         <p>Imie:<?php echo $_SESSION['first_name']?></p>
@@ -101,31 +186,73 @@ if ( window.history.replaceState ) {
               $search_stmt->bindParam(":user_id", $fetch_res['id']);
               $res = $search_stmt->execute();
               $posts = $search_stmt->fetchAll(PDO::FETCH_ASSOC);
-
               
-              if ($res && $posts) {
-                  echo "<div class='posts'>";
-                  foreach ($posts as $post) {
-                      echo "<div class='post'>";
-                      echo "<div><strong>Post ID:</strong> " . $post['id'] . "</div>";
-                      echo "<div><strong>Tytuł:</strong> " . $post['title'] . "</div>";
-                      echo "<div><strong>Treść:</strong> " . $post['content'] . "</div>";
-                      echo "<div><strong>Czas utworzenia:</strong> " . $post['created_at'] . "</div>";
-                      echo "</div>";
-                  }
-                  echo "</div>";
-              }
-          }else {
-            echo "<h3>Brak postów</h3>";
+          if ($res && $posts) {
+            echo "<div class='posts'>";
+            foreach ($posts as $post) {
+                echo "<div class='post'>";
+                echo "<div><strong>Post ID:</strong> " . $post['id'] . "</div>";
+                echo "<div><strong>Tytuł:</strong> " . $post['title'] . "</div>";
+                echo "<div><strong>Treść:</strong> " . $post['content'] . "</div>";
+                echo "<div><strong>Czas utworzenia:</strong> " . $post['created_at'] . "</div>";
+        
+                // Pobierz komentarze dla danego posta
+                $comments = getCommentsForPost($post['id'],$conn);
+                if ($comments) {
+                    echo "<div><strong>Komentarze:</strong></div>";
+                    echo "<div class='comments'>";
+                    foreach ($comments as $comment) {
+                        echo "<div class='comment'>";
+                        echo "<div><strong>Komentarz ID:</strong> " . $comment['id'] . "</div>";
+                        $commentsQuery = "SELECT users.first_name, users.last_name FROM users WHERE users.id=:id_user";
+                        $stmt = $conn->prepare($commentsQuery);
+                        $stmt->bindParam('id_user', $comment['user_id'], PDO::PARAM_INT);
+                        $stmt->execute();
+
+                        $res = $stmt->fetch();
+                        echo "<div><strong>Autor:</strong> " . $res['first_name']." ".$res['last_name']. "</div>";
+                        
+                        echo "<div><strong>Treść:</strong> " . $comment['content'] . "</div>";
+                        echo "<div><strong>Czas utworzenia:</strong> " . $comment['comment_date'] . "</div>";
+                        echo "</div>";
+                    }
+                    echo "</div>";
+                } else {
+                    echo "<div><em>Brak komentarzy</em></div>";
+                }
+                echo "<form method='post' action=". 
+                htmlspecialchars($_SERVER['PHP_SELF']).">";
+                echo "<label for='new_comment'>Nowy komentarz:</label>";
+                echo "<br>
+                      <input type='hidden' name='post_id' value='" . $post["id"] . "'>
+                      <textarea id='new_comment' name='new_comment' rows='1' cols='1' require></textarea>
+                      <br>";
+                echo "<button type='submit' name='dodaj_komentarz'>Dodaj komentarz</button>";
+                echo "</form>";
+                echo "</div>"; 
+            }
+            echo "</div>"; 
+          } else {
+              echo "<h3>Brak postów</h3>";
           }
+        }
         ?>
         
-        <!-- Admin 
-        <?php #if ($_SESSION['role'] == 'admin'): ?>
-          <h2>Panel administratora</h2>
-          admin cos robi 
-          <p>Admin</p>
-        <?php #endif; ?>-->
+        <?php if ($isAdmin): ?>
+          <!-- Formularz usuwania użytkownika -->
+          <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+              <label for="delete_user">Usuń użytkownika o ID:</label>
+              <input type="number" name="delete_user" required>
+              <input type="submit" value="Usuń użytkownika">
+          </form>
+
+        <!-- Formularz usuwania posta -->
+          <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+            <label for="delete_post">Usuń post o ID:</label>
+            <input type="number" name="delete_post" required>
+            <input type="submit" value="Usuń post">
+          </form>
+        <?php endif; ?>
 
       </div>
       <footer>

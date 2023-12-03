@@ -27,8 +27,7 @@ if ( window.history.replaceState ) {
         
         $res = $search_stmt->execute();
         $fetch_res = $search_stmt->fetch(PDO::FETCH_ASSOC);
-        
-
+      
         if ($res && $fetch_res){
             $hashed_password = $fetch_res['password'];
             if (password_verify($password, $hashed_password)){
@@ -36,10 +35,10 @@ if ( window.history.replaceState ) {
               $role = 'user';
 
               if (
-                  ($email === 'wiktor.sioła@student.up.kraków.pl' 
+                  ($email === 'wiktor.siola@student.up.krakow.pl' 
                   && password_verify($password, $fetch_res['password'])) 
                   ||
-                  ($email === 'viktor.siropol@student.up.kraków.pl' 
+                  ($email === 'viktor.siropol@student.up.krakow.pl' 
                   && password_verify($password, $fetch_res['password']))
                 )
                 $role == 'admin';
@@ -69,6 +68,7 @@ if ( window.history.replaceState ) {
         echo "Błąd: " . $e->getMessage();
       }
     }
+
 ?>
 <html lang="en">
   <head>
@@ -81,7 +81,7 @@ if ( window.history.replaceState ) {
     <link rel="stylesheet" href="styles/main.css" />
     <title>UKEN-awka</title>
   </head>
-  <body>
+  <body class="login-page">
     <div id="base_container">
       <div id="content">
         <header>

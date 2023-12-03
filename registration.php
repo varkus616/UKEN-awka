@@ -95,7 +95,7 @@
     <link rel="stylesheet" href="styles/main.css" />
     <title>UKEN-awka</title>
   </head>
-  <body>
+  <body class="registration-page">
     <div id="base_container">
       <div id="content">
         <header>
