@@ -28,52 +28,20 @@
           <a href="my_account.php">Moje konto</a>
           <a href="logout.php">Wyloguj</a>
         </header>
-
-        <form action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"])?> method="post">
-          <label for="first_name">Imie:</label>
-          <input type="text" id="first_name" name="first_name" required />
-
-          <label for="last_name">Nazwisko:</label>
-          <input type="text" id="last_name" name="last_name" required />
-
-          <input type="submit" value="Wyszukaj" />
-        </form>
         <?php 
-            if ($_SERVER["REQUEST_METHOD"] == "POST" &&
-                isset($_POST['first_name']) &&
-                isset($_POST['last_name']))
-            {
-                $searchFirstName = $_POST['first_name'];
-                $searchLastName = $_POST['last_name'];
-                $searchQuery = "
-                                SELECT *
-                                FROM users
-                                WHERE first_name LIKE :firstName
-                                AND last_name LIKE :lastName
-                            ";
-
-                $searchStatement = $conn->prepare($searchQuery);
-                $searchStatement->bindParam(':firstName', $searchFirstName, PDO::PARAM_STR);
-                $searchStatement->bindParam(':lastName', $searchLastName, PDO::PARAM_STR);
-                $searchStatement->execute();
-
-                $searchResults = $searchStatement->fetchAll(PDO::FETCH_ASSOC);
-                if ($searchResults){
+            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                if (isset($_POST["dodaj_do_przyjaciol"])) {
+                    $friendId = $_POST["friend_id"];
                     
+
                     $addFriendQuery = "
                                     INSERT INTO friends (user_id, friend_id)
-                                    VALUES (:userId, :friendId)
+                                    VALUES (:userId, :friendId), (:friendId, :userId);
                                     ";
 
-                    #foreach ($searchResults as $result) {
-                    #    foreach ($result as $key => $value) {
-                    #        echo $key . ": " . $value . "<br>";
-                    #    }
-                    #    echo "<hr>";}
-
-                    $friendId = $searchResults[0]['id'];
                     $addFriendStatement = $conn->prepare($addFriendQuery);
-                    $addFriendStatement->bindParam(':userId', getSessionVariable("user_id"), PDO::PARAM_INT);
+                    $user_id = getSessionVariable("user_id");
+                    $addFriendStatement->bindParam(':userId', $user_id, PDO::PARAM_INT);
                     $addFriendStatement->bindParam(':friendId', $friendId, PDO::PARAM_INT);
                     $addFriendResult = $addFriendStatement->execute();
 
@@ -83,11 +51,32 @@
                         echo "<h1 id='error_msg'>Nie udało się dodać przyjaciela...</h1>";
                     }
 
-                }else {
-                    echo "<h1 id='error_msg'>Nie ma nikogo takiego!</h1>";
                 }
             }
-        
+
+
+            $sql = "SELECT id, first_name, last_name FROM users 
+                    WHERE id != :user_id 
+                    AND id NOT IN (SELECT friend_id FROM friends WHERE user_id = :user_id)
+                    AND id NOT IN (SELECT user_id FROM friends WHERE friend_id = :user_id)";
+    
+            $stmt = $conn->prepare($sql);
+            $user_id = getSessionVariable("user_id");
+            $stmt->bindParam(":user_id",$user_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    echo "<form method='post'>";
+                    echo "<p>" . $row["first_name"] . " " . $row["last_name"] . " 
+                        <button type='submit' name='dodaj_do_przyjaciol'>Dodaj do przyjaciół</button>";
+                    echo "<input type='hidden' name='friend_id' value='" . $row["id"] . "'></p>";
+                    echo "</form>";
+                }
+            } else {
+                echo "Brak użytkowników.";
+            }
+
         ?>
       </div>
       <footer>

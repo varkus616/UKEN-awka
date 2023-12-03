@@ -12,6 +12,6 @@ try {
                         PDO::ERRMODE_EXCEPTION);
     $conn->exec("SET NAMES UTF8");
 }catch(PDOException $e){
-    echo "Connection failed: ".$e->getMessage();
+    die( "Connection failed: ".$e->getMessage());
 }
 ?>

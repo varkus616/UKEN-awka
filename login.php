@@ -61,6 +61,9 @@ if ( window.history.replaceState ) {
               $error_msg = "Logowanie niepoprawne. Proszę znowu spróbować.";
               $error = true;
           }
+        }else {
+          $error_msg = "Brak takiego użytkownika.";
+          $error = true;
         }
       }catch(PDOException $e){
         echo "Błąd: " . $e->getMessage();

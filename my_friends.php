@@ -29,38 +29,45 @@
           <a href="logout.php">Wyloguj</a>
         </header>
 
-            <?php 
+            <?php
+            
+                $user_id = getSessionVariable("user_id");
+
+                if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["remove_friend"])) {
+                  $friend_id = $_POST["friend_id"];
+                  $deleteQuery = "DELETE FROM friends
+                  WHERE (user_id = :user_id AND friend_id = :friend_id)
+                     OR (user_id = :friend_id AND friend_id = :user_id)";
+                  $deleteStatement = $conn->prepare($deleteQuery);
+
+                  $deleteStatement->bindParam(':friend_id', $friend_id, PDO::PARAM_INT);
+                  $deleteStatement->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+
+                  $deleteStatement->execute();
+                }
 
                 $friendsQuery = "
-                                SELECT users.first_name, users.last_name
+                                SELECT users.id, users.first_name, users.last_name
                                 FROM friends
                                 JOIN users ON friends.friend_id = users.id
                                 WHERE friends.user_id = :userId
                                 ";
 
                 $friendsStatement = $conn->prepare($friendsQuery);
-                $friendsStatement->bindParam(':userId', getSessionVariable("user_id"), PDO::PARAM_INT);
-
+                $friendsStatement->bindParam(':userId', $user_id, PDO::PARAM_INT);
                 $friendsStatement->execute();
-
                 $friends = $friendsStatement->fetchAll(PDO::FETCH_ASSOC);
 
-            
                 echo '<table border="1">';
-                echo '<tr><th>Name</th><th>Surname</th></tr>';
-
+                echo '<tr><th>Name</th><th>Surname</th><th>Action</th></tr>';
                 foreach ($friends as $friend) {
-                    echo '<tr>';
-                    echo '<td>' . $friend['first_name'] . '</td>';
+                    echo '<tr>'.$friend['id'];
+                    echo '<td><form method="post" action ="friendWall.php"><input type="hidden" name="friend_id" value="'.$friend['id'].'"><button type="submit" name="view_wall">' . $friend['first_name'] . '</button></form></td>';
                     echo '<td>' . $friend['last_name'] . '</td>';
+                    echo '<td><form method="post" action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'"><input type="hidden" name="friend_id" value="' . $friend['id'] . '"><button type="submit" name="remove_friend">Remove</button></form></td>';
                     echo '</tr>';
                 }
-
                 echo '</table>';
-
-
-                
-
             ?>
 
 
